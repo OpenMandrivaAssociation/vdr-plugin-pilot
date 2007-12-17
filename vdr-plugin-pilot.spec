@@ -12,7 +12,6 @@ Group:		Video
 License:	GPL
 URL:		http://famillejacques.free.fr/vdr/pilot/
 Source:		http://famillejacques.free.fr/vdr/pilot/vdr-%plugin-%version.tar.bz2
-BuildRoot:	%{_tmppath}/%{name}-buildroot
 BuildRequires:	vdr-devel >= 1.4.1-6
 Requires:	vdr-abi = %vdr_abi
 
