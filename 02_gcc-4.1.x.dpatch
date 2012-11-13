@@ -1,0 +1,51 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 02_gcc-4.1.x.dpatch by Tobias Grimm <tg@e-tobi.net>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fixes some compiler warnings.
+
+@DPATCH@
+diff -urNad vdr-plugin-pilot-0.0.9~/pilotosd.c vdr-plugin-pilot-0.0.9/pilotosd.c
+--- vdr-plugin-pilot-0.0.9~/pilotosd.c	2006-05-04 21:58:23.000000000 +0200
++++ vdr-plugin-pilot-0.0.9/pilotosd.c	2008-02-10 15:20:51.000000000 +0100
+@@ -34,7 +34,7 @@
+ {
+   delete osd;
+ }
+-void cPilotOsd::DrawSymbol(int x, int y, char *SymbolName[], tColor ColorFg)
++void cPilotOsd::DrawSymbol(int x, int y, const char *SymbolName[], tColor ColorFg)
+ {
+   cBitmap bm(SymbolName);
+   osd->DrawBitmap(x, y, bm, ColorFg, pal[0]);
+diff -urNad vdr-plugin-pilot-0.0.9~/pilotosd.h vdr-plugin-pilot-0.0.9/pilotosd.h
+--- vdr-plugin-pilot-0.0.9~/pilotosd.h	2008-02-10 15:20:27.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/pilotosd.h	2008-02-10 15:20:44.000000000 +0100
+@@ -11,7 +11,7 @@
+ 
+ class cPilotOsd : public cOsdObject {
+ private:
+-  void DrawSymbol(int x, int y, char *SymbolName[], tColor color);
++  void DrawSymbol(int x, int y, const char *SymbolName[], tColor color);
+   cOsd *osd;
+   int pal[16];
+   int lastTime;
+diff -urNad vdr-plugin-pilot-0.0.9~/symbols/down.xpm vdr-plugin-pilot-0.0.9/symbols/down.xpm
+--- vdr-plugin-pilot-0.0.9~/symbols/down.xpm	2008-02-10 15:20:22.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/symbols/down.xpm	2008-02-10 15:20:27.000000000 +0100
+@@ -1,5 +1,5 @@
+ /* XPM */
+-static char * down_xpm[] = {
++static const char * down_xpm[] = {
+ "22 26 2 1",
+ ".	c #FFFFFF",
+ "*	c #000000",
+diff -urNad vdr-plugin-pilot-0.0.9~/symbols/up.xpm vdr-plugin-pilot-0.0.9/symbols/up.xpm
+--- vdr-plugin-pilot-0.0.9~/symbols/up.xpm	2008-02-10 15:20:22.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/symbols/up.xpm	2008-02-10 15:20:27.000000000 +0100
+@@ -1,5 +1,5 @@
+ /* XPM */
+-static char * up_xpm[] = {
++static const char * up_xpm[] = {
+ "22 26 2 1",
+ ".	c #FFFFFF",
+ "*	c #000000",

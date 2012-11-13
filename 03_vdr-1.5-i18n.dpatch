@@ -1,0 +1,1410 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 03_vdr-1.5-i18n.dpatch by Tobias Grimm <tg@e-tobi.net>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Adds gettext i18n for vdr 1.5.
+
+@DPATCH@
+diff -urNad vdr-plugin-pilot-0.0.9~/Makefile vdr-plugin-pilot-0.0.9/Makefile
+--- vdr-plugin-pilot-0.0.9~/Makefile	2008-02-12 01:26:49.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/Makefile	2008-02-12 01:26:50.000000000 +0100
+@@ -61,9 +61,34 @@
+ 
+ -include $(DEPFILE)
+ 
++### Internationalization (I18N):
++
++PODIR     = po
++LOCALEDIR = $(VDRDIR)/locale
++I18Npo    = $(wildcard $(PODIR)/*.po)
++I18Nmsgs  = $(addprefix $(LOCALEDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
++I18Npot   = $(PODIR)/$(PLUGIN).pot
++
++%.mo: %.po
++	msgfmt -c -o $@ $<
++
++$(I18Npot): $(wildcard *.c)
++	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --msgid-bugs-address='<tg@e-tobi.net>' -o $@ $^
++
++%.po: $(I18Npot)
++	msgmerge -U --no-wrap --no-location --backup=none -q $@ $<
++	@touch $@
++
++$(I18Nmsgs): $(LOCALEDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
++	@mkdir -p $(dir $@)
++	cp $< $@
++
++.PHONY: i18n
++i18n: $(I18Nmsgs)
++
+ ### Targets:
+ 
+-all: libvdr-$(PLUGIN).so
++all: libvdr-$(PLUGIN).so i18n
+ 
+ libvdr-$(PLUGIN).so: $(OBJS)
+ 	$(CXX) $(CXXFLAGS) -shared $(OBJS) -o $@
+@@ -78,4 +103,5 @@
+ 	@echo Distribution package created as $(PACKAGE).tgz
+ 
+ clean:
++	@-rm -f $(PODIR)/*.mo $(PODIR)/*.pot
+ 	@-rm -f $(OBJS) $(DEPFILE) *.so *.tgz core* *~
+diff -urNad vdr-plugin-pilot-0.0.9~/i18n.h vdr-plugin-pilot-0.0.9/i18n.h
+--- vdr-plugin-pilot-0.0.9~/i18n.h	2006-05-04 21:58:23.000000000 +0200
++++ vdr-plugin-pilot-0.0.9/i18n.h	2008-02-12 01:26:50.000000000 +0100
+@@ -147,28 +147,6 @@
+     "", // TODO
+     "", // TODO
+   },
+-  { "Channel", // ENGLISH
+-    "Kanal", // GERMAN
+-    "", // TODO
+-    "Canale", // ITALIAN
+-    "Kanaal", // NL
+-    "", // TODO
+-    "Chaînes", // FR
+-    "", // TODO
+-    "Kanava", // FINNISH
+-    "", // TODO
+-    "", // TODO
+-    "Czatoma", // HU
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-  },
+   { "Origin X", // EN
+     "Position X", // GERMAN
+     "", // TODO
+@@ -235,50 +213,6 @@
+     "", // TODO
+     "", // TODO
+   },
+-  { "AddChannel",
+-    "Kanal hinzufügen", // GER
+-    "", // TODO
+-    "Aggiungi Canale", // ITALIAN
+-    "iKanaal bijdoen", // NL
+-    "", // TODO
+-    "Nouvelle chaîne",  // FR
+-    "", // TODO
+-    "Lisää kanava", // FINNISH
+-    "", // TODO
+-    "", // TODO
+-    "Adj csatornát hozza", // HU
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-  },
+-  { "RemoveChannel",
+-    "Kanal löschen", // GER
+-    "", // TODO
+-    "Rimuovi Canale", // ITALIAN
+-    "Kanaal wegneemen", // NL
+-    "", // TODO
+-    "Supprime chaîne", //FR
+-    "", // TODO
+-    "Poista kanava", // FINNISH
+-    "", // TODO
+-    "", // TODO
+-    "Fok csatornát", // HU
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-  },
+   { "Background opacity",
+     "Rand transparenz", // TODO
+     "", // TODO
+@@ -345,94 +279,6 @@
+     "", // TODO
+     "", // TODO
+   },
+-  { "Sort by",
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "Trier par",
+-    "", // TODO
+-    "Järjestä", // FINNISH
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-  },
+-  { "None",
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "Aucun",
+-    "", // TODO
+-    "ei", // FINNISH
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-  },
+-  { "Name",
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "Nom",
+-    "", // TODO
+-    "nimen mukaan", // FINNISH
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-  },
+-  { "As entered",
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "Tel que saisi",
+-    "", // TODO
+-    "syötteen mukaan", // FINNISH
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-  },
+   { "Close on OK",
+     "", // TODO
+     "", // TODO
+@@ -455,28 +301,6 @@
+     "", // TODO
+     "", // TODO
+   },
+-  { "Number of channels",
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "Nombre de chaînes",
+-    "", // TODO
+-    "Kanavien määrä", // FINNISH
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-    "", // TODO
+-  },
+   { "Use DXR3",
+     "", // TODO
+     "", // TODO
+diff -urNad vdr-plugin-pilot-0.0.9~/pilot.c vdr-plugin-pilot-0.0.9/pilot.c
+--- vdr-plugin-pilot-0.0.9~/pilot.c	2006-05-04 21:58:23.000000000 +0200
++++ vdr-plugin-pilot-0.0.9/pilot.c	2008-02-12 01:26:50.000000000 +0100
+@@ -10,7 +10,7 @@
+ #include "pilot.h"
+ #include "pilotosd.h"
+ #include "pilotsetup.h"
+-#include "i18n.h"
++#include <vdr/i18n.h>
+ #include <vdr/device.h>
+ 
+ int PilotChannelNumber;
+@@ -53,7 +53,6 @@
+ bool cPluginPilot::Start(void)
+ {
+   // Start any background activities the plugin shall perform.
+-  RegisterI18n(Phrases);
+   // Default values for setup
+   return true;
+ }
+diff -urNad vdr-plugin-pilot-0.0.9~/po/ca_ES.po vdr-plugin-pilot-0.0.9/po/ca_ES.po
+--- vdr-plugin-pilot-0.0.9~/po/ca_ES.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/ca_ES.po	2008-02-12 01:27:03.000000000 +0100
+@@ -0,0 +1,51 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Marc Rovira Vall <tm05462@salleURL.edu>, 2003
++# Ramon Roca <ramon.roca@xcombo.com>, 2003
++# Jordi Vilà <jvila@tinet.org>, 2003
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Jordi Vilà <jvila@tinet.org>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-1\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr ""
++
++msgid "Origin Y"
++msgstr ""
++
++msgid "Width"
++msgstr ""
++
++msgid "Background opacity"
++msgstr ""
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr ""
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/cs_CZ.po vdr-plugin-pilot-0.0.9/po/cs_CZ.po
+--- vdr-plugin-pilot-0.0.9~/po/cs_CZ.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/cs_CZ.po	2008-02-12 01:27:03.000000000 +0100
+@@ -0,0 +1,49 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Vladimír Bárta <vladimir.barta@k2atmitec.cz>, 2006
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Vladimír Bárta <vladimir.barta@k2atmitec.cz>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-2\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr ""
++
++msgid "Origin Y"
++msgstr ""
++
++msgid "Width"
++msgstr ""
++
++msgid "Background opacity"
++msgstr ""
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr ""
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/da_DK.po vdr-plugin-pilot-0.0.9/po/da_DK.po
+--- vdr-plugin-pilot-0.0.9~/po/da_DK.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/da_DK.po	2008-02-12 01:27:03.000000000 +0100
+@@ -0,0 +1,49 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Mogens Elneff <mogens@elneff.dk>, 2004
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Mogens Elneff <mogens@elneff.dk>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-15\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr ""
++
++msgid "Origin Y"
++msgstr ""
++
++msgid "Width"
++msgstr ""
++
++msgid "Background opacity"
++msgstr ""
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr ""
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/de_DE.po vdr-plugin-pilot-0.0.9/po/de_DE.po
+--- vdr-plugin-pilot-0.0.9~/po/de_DE.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/de_DE.po	2008-02-12 01:27:03.000000000 +0100
+@@ -0,0 +1,49 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Klaus Schmidinger <kls@cadsoft.de>, 2000
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Klaus Schmidinger <kls@cadsoft.de>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-15\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr "Position X"
++
++msgid "Origin Y"
++msgstr "Position Y"
++
++msgid "Width"
++msgstr "Breite"
++
++msgid "Background opacity"
++msgstr "Rand transparenz"
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr "Alpha Rand"
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/el_GR.po vdr-plugin-pilot-0.0.9/po/el_GR.po
+--- vdr-plugin-pilot-0.0.9~/po/el_GR.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/el_GR.po	2008-02-12 01:27:04.000000000 +0100
+@@ -0,0 +1,49 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Dimitrios Dimitrakos <mail@dimitrios.de>, 2002
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Dimitrios Dimitrakos <mail@dimitrios.de>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-7\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr "X helyzet"
++
++msgid "Origin Y"
++msgstr "Y helyzet"
++
++msgid "Width"
++msgstr "Szélesség"
++
++msgid "Background opacity"
++msgstr ""
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr "Alpha szegély"
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/es_ES.po vdr-plugin-pilot-0.0.9/po/es_ES.po
+--- vdr-plugin-pilot-0.0.9~/po/es_ES.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/es_ES.po	2008-02-12 01:27:04.000000000 +0100
+@@ -0,0 +1,49 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Ruben Nunez Francisco <ruben.nunez@tang-it.com>, 2002
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Ruben Nunez Francisco <ruben.nunez@tang-it.com>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-15\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr ""
++
++msgid "Origin Y"
++msgstr ""
++
++msgid "Width"
++msgstr ""
++
++msgid "Background opacity"
++msgstr ""
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr ""
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/et_EE.po vdr-plugin-pilot-0.0.9/po/et_EE.po
+--- vdr-plugin-pilot-0.0.9~/po/et_EE.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/et_EE.po	2008-02-12 01:27:04.000000000 +0100
+@@ -0,0 +1,49 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Arthur Konovalov <kasjas@hot.ee>, 2004
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Arthur Konovalov <kasjas@hot.ee>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-13\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr ""
++
++msgid "Origin Y"
++msgstr ""
++
++msgid "Width"
++msgstr ""
++
++msgid "Background opacity"
++msgstr ""
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr ""
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/fi_FI.po vdr-plugin-pilot-0.0.9/po/fi_FI.po
+--- vdr-plugin-pilot-0.0.9~/po/fi_FI.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/fi_FI.po	2008-02-12 01:27:04.000000000 +0100
+@@ -0,0 +1,52 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Hannu Savolainen <hannu@opensound.com>, 2002
++# Jaakko Hyvätti <jaakko@hyvatti.iki.fi>, 2002
++# Niko Tarnanen <niko.tarnanen@hut.fi>, 2003
++# Rolf Ahrenberg <rahrenbe@cc.hut.fi>, 2003
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Rolf Ahrenberg <rahrenbe@cc.hut.fi>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-15\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr "Punainen"
++
++msgid "Green"
++msgstr "Vihreä"
++
++msgid "Blue"
++msgstr "Sininen"
++
++msgid "Origin X"
++msgstr "Vaakasijainti"
++
++msgid "Origin Y"
++msgstr "Pystysijainti"
++
++msgid "Width"
++msgstr "Leveys"
++
++msgid "Background opacity"
++msgstr "Taustan läpinäkyvyys"
++
++msgid "Text opacity"
++msgstr "Tekstin läpinäkyvyys"
++
++msgid "Border opacity"
++msgstr "Reunan läpinäkyvyys"
++
++msgid "Close on OK"
++msgstr "Sulje painamalla OK"
++
++msgid "Use DXR3"
++msgstr "Käytä DXR3-moodia"
+diff -urNad vdr-plugin-pilot-0.0.9~/po/fr_FR.po vdr-plugin-pilot-0.0.9/po/fr_FR.po
+--- vdr-plugin-pilot-0.0.9~/po/fr_FR.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/fr_FR.po	2008-02-12 01:27:04.000000000 +0100
+@@ -0,0 +1,52 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Jean-Claude Repetto <jc@repetto.org>, 2001
++# Olivier Jacques <jacquesolivier@hotmail.com>, 2003
++# Gregoire Favre <greg@magma.unil.ch>, 2003
++# Nicolas Huillard <nhuillard@e-dition.fr>, 2005
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Nicolas Huillard <nhuillard@e-dition.fr>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-1\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr "Origine X"
++
++msgid "Origin Y"
++msgstr "Origine Y"
++
++msgid "Width"
++msgstr "Largeur"
++
++msgid "Background opacity"
++msgstr "Opacité du fond"
++
++msgid "Text opacity"
++msgstr "Opacité du texte"
++
++msgid "Border opacity"
++msgstr "Opacité du contour"
++
++msgid "Close on OK"
++msgstr "Fermer le menu sur OK"
++
++msgid "Use DXR3"
++msgstr "Utilisation de DXR3"
+diff -urNad vdr-plugin-pilot-0.0.9~/po/hr_HR.po vdr-plugin-pilot-0.0.9/po/hr_HR.po
+--- vdr-plugin-pilot-0.0.9~/po/hr_HR.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/hr_HR.po	2008-02-12 01:27:04.000000000 +0100
+@@ -0,0 +1,50 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Drazen Dupor <drazen.dupor@dupor.com>, 2004
++# Dino Ravnic <dino.ravnic@fer.hr>, 2004
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Drazen Dupor <drazen.dupor@dupor.com>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-2\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr ""
++
++msgid "Origin Y"
++msgstr ""
++
++msgid "Width"
++msgstr ""
++
++msgid "Background opacity"
++msgstr ""
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr ""
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/hu_HU.po vdr-plugin-pilot-0.0.9/po/hu_HU.po
+--- vdr-plugin-pilot-0.0.9~/po/hu_HU.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/hu_HU.po	2008-02-12 01:27:04.000000000 +0100
+@@ -0,0 +1,50 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Istvan Koenigsberger <istvnko@hotmail.com>, 2002
++# Guido Josten <guido.josten@t-online.de>, 2002
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Istvan Koenigsberger <istvnko@hotmail.com>, Guido Josten <guido.josten@t-online.de>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-2\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr ""
++
++msgid "Origin Y"
++msgstr ""
++
++msgid "Width"
++msgstr ""
++
++msgid "Background opacity"
++msgstr ""
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr ""
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/it_IT.po vdr-plugin-pilot-0.0.9/po/it_IT.po
+--- vdr-plugin-pilot-0.0.9~/po/it_IT.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/it_IT.po	2008-02-12 01:27:04.000000000 +0100
+@@ -0,0 +1,51 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Alberto Carraro <bertocar@tin.it>, 2001
++# Antonio Ospite <ospite@studenti.unina.it>, 2003
++# Sean Carlos <seanc@libero.it>, 2005
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Sean Carlos <seanc@libero.it>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-15\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr "Origine X"
++
++msgid "Origin Y"
++msgstr "Origine Y"
++
++msgid "Width"
++msgstr "Larghezza"
++
++msgid "Background opacity"
++msgstr "Alpha Bordo 1"
++
++msgid "Text opacity"
++msgstr "Alpha Bordo 2"
++
++msgid "Border opacity"
++msgstr "AlphaBordo"
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/nl_NL.po vdr-plugin-pilot-0.0.9/po/nl_NL.po
+--- vdr-plugin-pilot-0.0.9~/po/nl_NL.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/nl_NL.po	2008-02-12 01:27:05.000000000 +0100
+@@ -0,0 +1,51 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Arnold Niessen <niessen@iae.nl> <arnold.niessen@philips.com>, 2001
++# Hans Dingemans <hans.dingemans@tacticalops.nl>, 2003
++# Maarten Wisse <Maarten.Wisse@urz.uni-hd.de>, 2005
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Maarten Wisse <Maarten.Wisse@urz.uni-hd.de>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-15\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr "X positie"
++
++msgid "Origin Y"
++msgstr "Y positie"
++
++msgid "Width"
++msgstr "Breedte"
++
++msgid "Background opacity"
++msgstr ""
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr "Alpha kant"
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/nn_NO.po vdr-plugin-pilot-0.0.9/po/nn_NO.po
+--- vdr-plugin-pilot-0.0.9~/po/nn_NO.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/nn_NO.po	2008-02-12 01:27:05.000000000 +0100
+@@ -0,0 +1,50 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Jørgen Tvedt <pjtvedt@online.no>, 2001
++# Truls Slevigen <truls@slevigen.no>, 2002
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Truls Slevigen <truls@slevigen.no>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-1\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr ""
++
++msgid "Origin Y"
++msgstr ""
++
++msgid "Width"
++msgstr ""
++
++msgid "Background opacity"
++msgstr ""
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr ""
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/pl_PL.po vdr-plugin-pilot-0.0.9/po/pl_PL.po
+--- vdr-plugin-pilot-0.0.9~/po/pl_PL.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/pl_PL.po	2008-02-12 01:27:05.000000000 +0100
+@@ -0,0 +1,49 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Michael Rakowski <mrak@gmx.de>, 2002
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Michael Rakowski <mrak@gmx.de>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-2\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr ""
++
++msgid "Origin Y"
++msgstr ""
++
++msgid "Width"
++msgstr ""
++
++msgid "Background opacity"
++msgstr ""
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr ""
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/pt_PT.po vdr-plugin-pilot-0.0.9/po/pt_PT.po
+--- vdr-plugin-pilot-0.0.9~/po/pt_PT.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/pt_PT.po	2008-02-12 01:27:05.000000000 +0100
+@@ -0,0 +1,49 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Paulo Lopes <pmml@netvita.pt>, 2001
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Paulo Lopes <pmml@netvita.pt>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-1\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr ""
++
++msgid "Origin Y"
++msgstr ""
++
++msgid "Width"
++msgstr ""
++
++msgid "Background opacity"
++msgstr ""
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr ""
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/ro_RO.po vdr-plugin-pilot-0.0.9/po/ro_RO.po
+--- vdr-plugin-pilot-0.0.9~/po/ro_RO.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/ro_RO.po	2008-02-12 01:27:05.000000000 +0100
+@@ -0,0 +1,50 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Paul Lacatus <paul@campina.iiruc.ro>, 2002
++# Lucian Muresan <lucianm@users.sourceforge.net>, 2004
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Lucian Muresan <lucianm@users.sourceforge.net>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-2\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr ""
++
++msgid "Origin Y"
++msgstr ""
++
++msgid "Width"
++msgstr ""
++
++msgid "Background opacity"
++msgstr ""
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr ""
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/ru_RU.po vdr-plugin-pilot-0.0.9/po/ru_RU.po
+--- vdr-plugin-pilot-0.0.9~/po/ru_RU.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/ru_RU.po	2008-02-12 01:27:05.000000000 +0100
+@@ -0,0 +1,49 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Vyacheslav Dikonov <sdiconov@mail.ru>, 2004
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Vyacheslav Dikonov <sdiconov@mail.ru>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-5\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr ""
++
++msgid "Origin Y"
++msgstr ""
++
++msgid "Width"
++msgstr ""
++
++msgid "Background opacity"
++msgstr ""
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr ""
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/sl_SI.po vdr-plugin-pilot-0.0.9/po/sl_SI.po
+--- vdr-plugin-pilot-0.0.9~/po/sl_SI.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/sl_SI.po	2008-02-12 01:27:06.000000000 +0100
+@@ -0,0 +1,50 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Miha Setina <mihasetina@softhome.net>, 2000
++# Matjaz Thaler <matjaz.thaler@guest.arnes.si>, 2003
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Matjaz Thaler <matjaz.thaler@guest.arnes.si>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-2\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr ""
++
++msgid "Origin Y"
++msgstr ""
++
++msgid "Width"
++msgstr ""
++
++msgid "Background opacity"
++msgstr ""
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr ""
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/sv_SE.po vdr-plugin-pilot-0.0.9/po/sv_SE.po
+--- vdr-plugin-pilot-0.0.9~/po/sv_SE.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/sv_SE.po	2008-02-12 01:27:06.000000000 +0100
+@@ -0,0 +1,50 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Tomas Prybil <tomas@prybil.se>, 2002
++# Jan Ekholm <chakie@infa.abo.fi>, 2003
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Tomas Prybil <tomas@prybil.se>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-1\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr ""
++
++msgid "Origin Y"
++msgstr ""
++
++msgid "Width"
++msgstr ""
++
++msgid "Background opacity"
++msgstr ""
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr ""
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
+diff -urNad vdr-plugin-pilot-0.0.9~/po/tr_TR.po vdr-plugin-pilot-0.0.9/po/tr_TR.po
+--- vdr-plugin-pilot-0.0.9~/po/tr_TR.po	1970-01-01 01:00:00.000000000 +0100
++++ vdr-plugin-pilot-0.0.9/po/tr_TR.po	2008-02-12 01:27:06.000000000 +0100
+@@ -0,0 +1,49 @@
++# VDR plugin language source file.
++# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
++# This file is distributed under the same license as the VDR package.
++# Oktay Yolgeçen <oktay_73@yahoo.de>, 2007
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR 1.5.7\n"
++"Report-Msgid-Bugs-To: <tg@e-tobi.net>\n"
++"POT-Creation-Date: 2008-02-12 01:27+0100\n"
++"PO-Revision-Date: 2008-02-10 15:34+0100\n"
++"Last-Translator: Oktay Yolgeçen <oktay_73@yahoo.de>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-9\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++msgid "Red"
++msgstr ""
++
++msgid "Green"
++msgstr ""
++
++msgid "Blue"
++msgstr ""
++
++msgid "Origin X"
++msgstr ""
++
++msgid "Origin Y"
++msgstr ""
++
++msgid "Width"
++msgstr ""
++
++msgid "Background opacity"
++msgstr ""
++
++msgid "Text opacity"
++msgstr ""
++
++msgid "Border opacity"
++msgstr ""
++
++msgid "Close on OK"
++msgstr ""
++
++msgid "Use DXR3"
++msgstr ""
