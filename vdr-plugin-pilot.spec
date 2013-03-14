@@ -2,7 +2,7 @@
 %define plugin	pilot
 %define name	vdr-plugin-%plugin
 %define version	0.0.9
-%define rel	16
+%define rel	17
 
 Summary:	VDR plugin: A zapping co-pilot
 Name:		%name
@@ -15,7 +15,6 @@ Source:		http://famillejacques.free.fr/vdr/pilot/vdr-%plugin-%version.tar.bz2
 Patch0:		01_drop-unused-code.dpatch
 Patch1:		02_gcc-4.1.x.dpatch
 Patch2:		03_vdr-1.5-i18n.dpatch
-BuildRoot:	%{_tmppath}/%{name}-buildroot
 BuildRequires:	vdr-devel >= 1.6.0
 Requires:	vdr-abi = %vdr_abi
 
@@ -34,17 +33,7 @@ the EPG information.
 %vdr_plugin_build
 
 %install
-rm -rf %{buildroot}
 %vdr_plugin_install
-
-%clean
-rm -rf %{buildroot}
-
-%post
-%vdr_plugin_post %plugin
-
-%postun
-%vdr_plugin_postun %plugin
 
 %files -f %plugin.vdr
 %defattr(-,root,root)
