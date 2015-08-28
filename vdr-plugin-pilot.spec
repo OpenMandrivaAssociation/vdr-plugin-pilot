@@ -3,7 +3,7 @@
 Summary:	VDR plugin: A zapping co-pilot
 Name:		vdr-plugin-%plugin
 Version:	0.0.9
-Release:	18
+Release:	19
 Group:		Video
 License:	GPL
 URL:		http://famillejacques.free.fr/vdr/pilot/
