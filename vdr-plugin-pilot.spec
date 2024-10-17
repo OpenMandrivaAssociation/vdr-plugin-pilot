@@ -6,7 +6,7 @@ Version:	0.0.9
 Release:	19
 Group:		Video
 License:	GPL
-URL:		http://famillejacques.free.fr/vdr/pilot/
+URL:		https://famillejacques.free.fr/vdr/pilot/
 Source:		http://famillejacques.free.fr/vdr/pilot/vdr-%plugin-%{version}.tar.bz2
 Patch0:		01_drop-unused-code.dpatch
 Patch1:		02_gcc-4.1.x.dpatch
